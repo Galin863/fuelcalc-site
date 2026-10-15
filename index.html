@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="bg">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#14251f">
+  <meta name="description" content="Лесен калкулатор за разход на гориво и цена на пътуване.">
+  <title>FuelCalc — разход на гориво</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#" aria-label="FuelCalc начало">
+      <span class="brand-icon">⛽</span>
+      <span><strong>FuelCalc</strong><small>Калкулатор за гориво</small></span>
+    </a>
+    <span class="storage-note"><span class="status-dot"></span> Запазва се на това устройство</span>
+  </header>
+
+  <main class="layout">
+    <section class="intro">
+      <p class="eyebrow">ТВОЯТ ПЪТ. ТВОЯТ РАЗХОД.</p>
+      <h1>Колко ще ти струва<br class="desktop-only"> следващото пътуване?</h1>
+      <p class="intro-copy">Добави автомобилите си веднъж и смятай разхода за всяко пътуване за секунди.</p>
+    </section>
+
+    <section class="calculator panel" aria-labelledby="calc-heading">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">КАЛКУЛАТОР</p>
+          <h2 id="calc-heading">Изчисли пътуване</h2>
+        </div>
+        <span class="heading-icon">↗</span>
+      </div>
+
+      <div class="field">
+        <label for="carSelect">Автомобил</label>
+        <select id="carSelect"></select>
+        <p class="field-help" id="selectedCarInfo">Избери автомобил от списъка.</p>
+      </div>
+
+      <div class="field">
+        <label for="distance">Изминати километри</label>
+        <div class="input-wrap"><input id="distance" type="number" min="0" step="any" value="100" inputmode="decimal"><span>км</span></div>
+      </div>
+
+      <div class="field">
+        <label for="fuelPrice">Цена на горивото</label>
+        <div class="input-wrap"><input id="fuelPrice" type="number" min="0" step="any" value="2.50" inputmode="decimal"><span>€/л</span></div>
+      </div>
+
+      <div class="results" aria-live="polite">
+        <div class="result-line"><span>Необходимо гориво</span><strong id="litersResult">0,00 л</strong></div>
+        <div class="result-line"><span>Разход на 100 км</span><strong id="consumptionResult">—</strong></div>
+        <div class="result-total"><span>Цена на пътуването</span><strong id="costResult">0,00 €</strong></div>
+        <p class="result-foot" id="costPerKm">0,00 € на километър</p>
+      </div>
+    </section>
+
+    <section class="cars-section panel" aria-labelledby="cars-heading">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">ТВОЯТ ГАРАЖ</p>
+          <h2 id="cars-heading">Запазени автомобили</h2>
+        </div>
+        <span class="car-count" id="carCount">0 коли</span>
+      </div>
+      <div id="carsList" class="cars-list"></div>
+      <div id="emptyState" class="empty-state">
+        <span class="empty-icon">🚘</span>
+        <strong>Все още няма автомобили</strong>
+        <p>Добави първата си кола, за да я използваш в калкулатора.</p>
+      </div>
+      <button class="button button-primary full-width" id="addCarBtn" type="button">＋ Добави автомобил</button>
+      <p class="privacy-note">Данните се съхраняват само в localStorage на този браузър. Изчистването на данните на браузъра може да ги изтрие.</p>
+    </section>
+  </main>
+
+  <dialog id="carDialog" class="car-dialog">
+    <form id="carForm">
+      <div class="dialog-heading">
+        <div><p class="eyebrow" id="dialogEyebrow">НОВ АВТОМОБИЛ</p><h2 id="dialogTitle">Добави автомобил</h2></div>
+        <button class="icon-button" type="button" id="closeDialog" aria-label="Затвори">✕</button>
+      </div>
+      <input id="carId" type="hidden">
+      <div class="field">
+        <label for="carName">Име на автомобила</label>
+        <input id="carName" type="text" maxlength="60" placeholder="Напр. BMW E46 318i" required>
+      </div>
+      <div class="field">
+        <label for="carFuelType">Вид гориво</label>
+        <select id="carFuelType">
+          <option value="Бензин">Бензин</option>
+          <option value="Дизел">Дизел</option>
+          <option value="LPG">Газ (LPG)</option>
+          <option value="Метан">Метан</option>
+          <option value="Хибрид">Хибрид</option>
+          <option value="Електричество">Електричество (kWh/100 км)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="carConsumption">Среден разход на 100 км</label>
+        <div class="input-wrap"><input id="carConsumption" type="number" min="0.01" max="200" step="any" placeholder="Напр. 8.5" required inputmode="decimal"><span id="consumptionUnit">л/100 км</span></div>
+      </div>
+      <div class="field">
+        <label for="carDefaultPrice">Цена на горивото (по желание)</label>
+        <div class="input-wrap"><input id="carDefaultPrice" type="number" min="0" max="100000" step="any" placeholder="Напр. 2.50" inputmode="decimal"><span id="priceUnit">€/л</span></div>
+        <p class="field-help">Тази цена ще се попълва автоматично при избор на автомобила.</p>
+      </div>
+      <p class="form-error" id="formError" role="alert"></p>
+      <div class="dialog-actions">
+        <button class="button button-secondary" type="button" id="cancelDialog">Отказ</button>
+        <button class="button button-primary" type="submit">Запази автомобила</button>
+      </div>
+    </form>
+  </dialog>
+
+  <footer><span>FuelCalc</span><span>Направено за по-лесно планиране на пътуванията.</span></footer>
+</body>
+</html>
